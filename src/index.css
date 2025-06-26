@@ -1,0 +1,183 @@
+
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+
+    :root {
+        --primary: #FF6B6B;
+        --secondary: #4ECDC4;
+        --dark: #292F36;
+        --light: #F7FFF7;
+        --accent: #FFE66D;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8fafc;
+        color: var(--dark);
+    }
+
+    .title-font {
+        font-family: 'Playfair Display', serif;
+    }
+
+    .gradient-bg {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+
+    /* Table States */
+    .table-available {
+        background-color: #DCFCE7;
+        border-color: #22C55E;
+    }
+
+    .table-occupied {
+        background-color: #FEE2E2;
+        border-color: #EF4444;
+    }
+
+    .table-reserved {
+        background-color: #FEF3C7;
+        border-color: #F59E0B;
+    }
+
+    .table-maintenance {
+        background-color: #EFF6FF;
+        border-color: #3B82F6;
+    }
+
+    /* Table Card Hover */
+    .table-card,
+    .menu-item-card,
+    .dashboard-card,
+    .order-card,
+    .card,
+    .register-card,
+    .login-card,
+    .review-card {
+        transition: all 0.3s ease;
+    }
+
+    .table-card:hover,
+    .menu-item-card:hover,
+    .dashboard-card:hover,
+    .order-card:hover,
+    .card:hover,
+    .register-card:hover,
+    .login-card:hover,
+    .review-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    /* Inputs */
+    .input-field:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+    }
+
+    /* Menu Active Category */
+    .menu-category.active {
+        border-bottom: 3px solid var(--primary);
+        color: var(--primary);
+    }
+
+    /* Sidebar Hover */
+    .sidebar-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Order Status */
+    .order-card {
+        border-left: 4px solid transparent;
+    }
+
+    .order-status-pending {
+        border-left-color: #3B82F6;
+    }
+
+    .order-status-preparing {
+        border-left-color: #F59E0B;
+    }
+
+    .order-status-ready {
+        border-left-color: #10B981;
+    }
+
+    .order-status-delivered {
+        border-left-color: #6B7280;
+    }
+
+    .order-status-cancelled {
+        border-left-color: #EF4444;
+    }
+
+    /* Order Item Hover */
+    .order-item:hover {
+        background-color: #F3F4F6;
+    }
+
+    /* Star Rating */
+    .star-rating .star {
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .star-rating .star:hover,
+    .star-rating .star.active {
+        color: var(--accent);
+    }
+
+    /* Sentiment Borders */
+    .sentiment-positive {
+        border-left: 4px solid #10B981;
+    }
+
+    .sentiment-negative {
+        border-left: 4px solid #EF4444;
+    }
+
+    .sentiment-neutral {
+        border-left: 4px solid #F59E0B;
+    }
+
+    /* Pulse Animations */
+    .pulse-animation,
+    .cart-notification {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Slide In Notification */
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .notification {
+        animation: slideIn 0.3s ease-out;
+    }
+

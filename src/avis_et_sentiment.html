@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastroSentiment | Gestion & Analyse Client</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FFE66D;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: var(--dark);
+        }
+        
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .sentiment-positive {
+            border-left: 4px solid #10B981;
+        }
+        
+        .sentiment-negative {
+            border-left: 4px solid #EF4444;
+        }
+        
+        .sentiment-neutral {
+            border-left: 4px solid #F59E0B;
+        }
+        
+        .dashboard-card {
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-2xl"></i>
+                <span class="title-font text-2xl font-bold">GastroSentiment</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#" class="hover:text-gray-200 font-medium">Tableau de bord</a>
+                <a href="#" class="hover:text-gray-200 font-medium">Analytique</a>
+                <a href="#" class="hover:text-gray-200 font-medium">Menu</a>
+                <a href="#" class="hover:text-gray-200 font-medium">Clients</a>
+                <div class="relative">
+                    <button class="flex items-center space-x-1 hover:text-gray-200">
+                        <span>Mon établissement</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="relative p-2 rounded-full hover:bg-white hover:bg-opacity-20">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="h-8 w-8 rounded-full">
+                    <span class="hidden md:inline">Sophie Martin</span>
+                </div>
+            </div>
+            <button class="md:hidden">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="hidden md:block w-64 bg-white shadow-lg h-screen sticky top-0">
+            <div class="p-4">
+                <div class="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="h-10 w-10 rounded-full">
+                    <div>
+                        <p class="font-medium">Sophie Martin</p>
+                        <p class="text-xs text-gray-500">Gérante</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <h3 class="text-xs uppercase font-semibold text-gray-500 px-3 mb-2">Général</h3>
+                    <ul>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-tachometer-alt w-5"></i>
+                                <span>Tableau de bord</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-chart-line w-5"></i>
+                                <span>Analytique</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-utensils w-5"></i>
+                                <span>Menu</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h3 class="text-xs uppercase font-semibold text-gray-500 px-3 mt-6 mb-2">Clients</h3>
+                    <ul>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-users w-5"></i>
+                                <span>Clients</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg bg-blue-50 text-blue-600">
+                            <a href="#" class="flex items-center space-x-3 p-3">
+                                <i class="fas fa-comment-dots w-5"></i>
+                                <span>Avis & Sentiments</span>
+                                <span class="ml-auto bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">15</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-envelope w-5"></i>
+                                <span>Newsletter</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h3 class="text-xs uppercase font-semibold text-gray-500 px-3 mt-6 mb-2">Paramètres</h3>
+                    <ul>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-cog w-5"></i>
+                                <span>Paramètres</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-question-circle w-5"></i>
+                                <span>Aide</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="mb-6 flex justify-between items-center">
+                <h1 class="title-font text-3xl font-bold text-gray-800">Analyse des Avis Clients</h1>
+                <div class="flex space-x-3">
+                    <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-50">
+                        <i class="fas fa-filter"></i>
+                        <span>Filtrer</span>
+                    </button>
+                    <button class="flex items-center space-x-2 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700">
+                        <i class="fas fa-plus"></i>
+                        <span>Nouvelle enquête</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="dashboard-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Avis totaux</p>
+                            <h3 class="text-2xl font-bold mt-1">142</h3>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-comment text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-green-500 text-sm font-medium"><i class="fas fa-arrow-up"></i> 12% ce mois</span>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Satisfaction</p>
+                            <h3 class="text-2xl font-bold mt-1">4.7/5</h3>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-smile text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-green-500 text-sm font-medium"><i class="fas fa-arrow-up"></i> 0.3 ce mois</span>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Positifs</p>
+                            <h3 class="text-2xl font-bold mt-1">87%</h3>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-thumbs-up text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-red-500 text-sm font-medium"><i class="fas fa-arrow-down"></i> 2% ce mois</span>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Réponse</p>
+                            <h3 class="text-2xl font-bold mt-1">92%</h3>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                            <i class="fas fa-reply text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-green-500 text-sm font-medium"><i class="fas fa-arrow-up"></i> 5% ce mois</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sentiment Analysis -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="title-font text-xl font-bold text-gray-800">Tendance des Sentiments</h2>
+                        <select class="bg-gray-100 border border-gray-300 text-gray-700 py-1 px-3 rounded-lg focus:outline-none">
+                            <option>30 derniers jours</option>
+                            <option>7 derniers jours</option>
+                            <option>Ce mois</option>
+                            <option>Cette année</option>
+                        </select>
+                    </div>
+                    <div class="h-80">
+                        <!-- Chart Placeholder -->
+                        <div class="flex items-center justify-center h-full bg-gray-100 rounded-lg">
+                            <div class="text-center">
+                                <i class="fas fa-chart-line text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500">Visualisation des données de sentiment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="title-font text-xl font-bold text-gray-800 mb-6">Répartition des Sentiments</h2>
+                    <div class="h-80">
+                        <!-- Pie Chart Placeholder -->
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <div class="relative w-40 h-40 mb-6">
+                                <div class="absolute inset-0 rounded-full bg-green-100 flex items-center justify-center">
+                                    <div class="h-32 w-32 rounded-full bg-white flex items-center justify-center">
+                                        <span class="text-xl font-bold">87%</span>
+                                    </div>
+                                </div>
+                                <div class="absolute inset-0 rounded-full" style="clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%); background: conic-gradient(#10B981 87%, #F59E0B 8%, #EF4444 5%);"></div>
+                            </div>
+                            <div class="w-full space-y-3">
+                                <div class="flex items-center">
+                                    <div class="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                                    <span class="text-sm">Positif</span>
+                                    <span class="ml-auto font-medium">87%</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="h-3 w-3 rounded-full bg-yellow-500 mr-2"></div>
+                                    <span class="text-sm">Neutre</span>
+                                    <span class="ml-auto font-medium">8%</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="h-3 w-3 rounded-full bg-red-500 mr-2"></div>
+                                    <span class="text-sm">Négatif</span>
+                                    <span class="ml-auto font-medium">5%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reviews -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="title-font text-xl font-bold text-gray-800">Derniers Avis</h2>
+                        <button class="text-blue-600 text-sm font-medium">Voir tout</button>
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    <!-- Review 1 -->
+                    <div class="review-card p-6 transition duration-300 ease-in-out sentiment-positive">
+                        <div class="flex items-start">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="h-10 w-10 rounded-full mr-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-bold">Thomas Leroy</h4>
+                                        <div class="flex items-center mt-1">
+                                            <div class="flex text-yellow-400">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <span class="text-gray-500 text-sm ml-2">12 mai 2023</span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Positif</span>
+                                </div>
+                                <p class="mt-3 text-gray-700">"Excellente expérience ! Le service était impeccable et le plat principal (le filet de boeuf) était cuit à la perfection. L'ambiance du restaurant est très agréable. Je recommande vivement !"</p>
+                                <div class="mt-4 flex items-center text-sm">
+                                    <span class="text-gray-500">Commandé : Filet de boeuf, Vin rouge</span>
+                                </div>
+                                <div class="mt-4 flex space-x-3">
+                                    <button class="text-blue-600 text-sm font-medium flex items-center">
+                                        <i class="fas fa-reply mr-1"></i> Répondre
+                                    </button>
+                                    <button class="text-gray-500 text-sm font-medium flex items-center">
+                                        <i class="fas fa-flag mr-1"></i> Signaler
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Review 2 -->
+                    <div class="review-card p-6 transition duration-300 ease-in-out sentiment-neutral">
+                        <div class="flex items-start">
+                            <img src="https://randomuser.me/api/portraits/women/63.jpg" alt="User" class="h-10 w-10 rounded-full mr-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-bold">Élodie Bernard</h4>
+                                        <div class="flex items-center mt-1">
+                                            <div class="flex text-yellow-400">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star text-gray-300"></i>
+                                            </div>
+                                            <span class="text-gray-500 text-sm ml-2">10 mai 2023</span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Neutre</span>
+                                </div>
+                                <p class="mt-3 text-gray-700">"Bon restaurant dans l'ensemble. Les plats étaient bons mais le service un peu lent. Le dessert (tiramisu) était délicieux. Prix un peu élevé pour ce que c'est."</p>
+                                <div class="mt-4 flex items-center text-sm">
+                                    <span class="text-gray-500">Commandé : Salade César, Tiramisu</span>
+                                </div>
+                                <div class="mt-4 flex space-x-3">
+                                    <button class="text-blue-600 text-sm font-medium flex items-center">
+                                        <i class="fas fa-reply mr-1"></i> Répondre
+                                    </button>
+                                    <button class="text-gray-500 text-sm font-medium flex items-center">
+                                        <i class="fas fa-flag mr-1"></i> Signaler
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Review 3 -->
+                    <div class="review-card p-6 transition duration-300 ease-in-out sentiment-negative">
+                        <div class="flex items-start">
+                            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="User" class="h-10 w-10 rounded-full mr-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-bold">Marc Dubois</h4>
+                                        <div class="flex items-center mt-1">
+                                            <div class="flex text-yellow-400">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star text-gray-300"></i>
+                                                <i class="fas fa-star text-gray-300"></i>
+                                                <i class="fas fa-star text-gray-300"></i>
+                                            </div>
+                                            <span class="text-gray-500 text-sm ml-2">8 mai 2023</span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">Négatif</span>
+                                </div>
+                                <p class="mt-3 text-gray-700">"Déçu par mon expérience. Le plat principal (saumon) était trop cuit et manquait de saveur. Le serveur a mis longtemps à prendre notre commande. Pas sûr de revenir."</p>
+                                <div class="mt-4 flex items-center text-sm">
+                                    <span class="text-gray-500">Commandé : Saumon grillé, Eau minérale</span>
+                                </div>
+                                <div class="mt-4 flex space-x-3">
+                                    <button class="text-blue-600 text-sm font-medium flex items-center">
+                                        <i class="fas fa-reply mr-1"></i> Répondre
+                                    </button>
+                                    <button class="text-gray-500 text-sm font-medium flex items-center">
+                                        <i class="fas fa-flag mr-1"></i> Signaler
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Word Cloud -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h2 class="title-font text-xl font-bold text-gray-800 mb-6">Mots-clés des Avis</h2>
+                <div class="flex flex-wrap justify-center gap-3 p-8 bg-gray-50 rounded-lg">
+                    <span class="text-2xl font-bold text-blue-600">délicieux</span>
+                    <span class="text-xl font-bold text-green-600">service</span>
+                    <span class="text-3xl font-bold text-purple-600">excellent</span>
+                    <span class="text-lg font-medium text-yellow-600">ambiance</span>
+                    <span class="text-xl font-bold text-red-600">lent</span>
+                    <span class="text-2xl font-bold text-indigo-600">qualité</span>
+                    <span class="text-lg font-medium text-pink-600">accueil</span>
+                    <span class="text-xl font-bold text-blue-600">recommande</span>
+                    <span class="text-lg font-medium text-green-600">propre</span>
+                    <span class="text-2xl font-bold text-red-600">déçu</span>
+                    <span class="text-xl font-bold text-purple-600">parfait</span>
+                    <span class="text-lg font-medium text-yellow-600">prix</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="title-font text-lg font-bold mb-4">GastroSentiment</h3>
+                    <p class="text-gray-400">La solution tout-en-un pour gérer votre établissement et comprendre vos clients grâce à l'analyse de sentiment.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Produit</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Fonctionnalités</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Tarifs</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">API</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Intégrations</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Ressources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Documentation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cas clients</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Contact</h4>
+                    <ul class="space-y-2">
+                        <li class="text-gray-400">contact@gastrosentiment.com</li>
+                        <li class="text-gray-400">+33 1 23 45 67 89</li>
+                        <li class="flex space-x-4 mt-4">
+                            <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2023 GastroSentiment. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple animation for the word cloud
+        document.addEventListener('DOMContentLoaded', function() {
+            const words = document.querySelectorAll('.flex-wrap span');
+            
+            words.forEach(word => {
+                // Random rotation between -10 and 10 degrees
+                const rotation = Math.floor(Math.random() * 20) - 10;
+                word.style.transform = `rotate(${rotation}deg)`;
+                
+                // Add hover effect
+                word.addEventListener('mouseover', function() {
+                    this.style.transform = `rotate(0deg) scale(1.2)`;
+                    this.style.transition = 'all 0.3s ease';
+                });
+                
+                word.addEventListener('mouseout', function() {
+                    this.style.transform = `rotate(${rotation}deg) scale(1)`;
+                });
+            });
+            
+            // Simulate sentiment analysis on review hover
+            const reviews = document.querySelectorAll('.review-card');
+            reviews.forEach(review => {
+                review.addEventListener('mouseenter', function() {
+                    const sentimentClass = Array.from(this.classList).find(cls => cls.startsWith('sentiment-'));
+                    if (sentimentClass) {
+                        const sentiment = sentimentClass.split('-')[1];
+                        console.log(`Avis ${sentiment} survolé`);
+                        // Here you could add more interactive elements
+                    }
+                });
+            });
+        });
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=VictoireKasende/restaurant-gestion" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>

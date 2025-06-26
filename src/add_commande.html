@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastroManager - Nouvelle Commande</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FFE66D;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: var(--dark);
+        }
+        
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .form-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .menu-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .selected-item {
+            border-left: 4px solid var(--primary);
+            background-color: #f0fdf4;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <!-- ... (identique à votre template) ... -->
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="hidden md:block w-64 bg-white shadow-lg h-screen sticky top-0">
+            <!-- ... (identique à votre template) ... -->
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="flex items-center mb-6">
+                <a href="commandes.html" class="text-gray-500 hover:text-primary mr-2">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="title-font text-3xl font-bold text-gray-800">Nouvelle Commande</h1>
+            </div>
+
+            <!-- Formulaire en deux colonnes -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Colonne gauche - Informations de base -->
+                <div class="lg:col-span-1">
+                    <div class="form-card bg-white rounded-xl shadow-md p-6 mb-6">
+                        <h2 class="font-bold text-lg mb-4">Informations de base</h2>
+                        
+                        <!-- Sélection de la table -->
+                        <div class="mb-4">
+                            <label for="table" class="block text-sm font-medium text-gray-700 mb-1">Table*</label>
+                            <select id="table" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Sélectionnez une table</option>
+                                <option value="1">Table 1 (2 pers.)</option>
+                                <option value="2">Table 2 (4 pers.)</option>
+                                <option value="3">Table 3 (6 pers.)</option>
+                                <option value="4">Table 4 (2 pers.)</option>
+                                <option value="5">Table 5 (8 pers.)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Nombre de personnes -->
+                        <div class="mb-4">
+                            <label for="people" class="block text-sm font-medium text-gray-700 mb-1">Nombre de personnes*</label>
+                            <input type="number" id="people" min="1" max="20" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <!-- Serveur -->
+                        <div class="mb-4">
+                            <label for="server" class="block text-sm font-medium text-gray-700 mb-1">Serveur*</label>
+                            <select id="server" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Attribuer à un serveur</option>
+                                <option value="1">Jean Dupont</option>
+                                <option value="2">Marie Lambert</option>
+                                <option value="3">Thomas Martin</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            <textarea id="notes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Allergies, préférences spéciales...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Résumé de la commande -->
+                    <div class="form-card bg-white rounded-xl shadow-md p-6">
+                        <h2 class="font-bold text-lg mb-4">Résumé de la commande</h2>
+                        <div id="orderSummary" class="mb-4">
+                            <p class="text-gray-500 text-sm">Aucun article ajouté</p>
+                        </div>
+                        <div class="border-t border-gray-200 pt-4">
+                            <div class="flex justify-between mb-2">
+                                <span>Sous-total:</span>
+                                <span id="subtotal">0,00 €</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span>Service (10%):</span>
+                                <span id="service">0,00 €</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-lg">
+                                <span>Total:</span>
+                                <span id="total">0,00 €</span>
+                            </div>
+                        </div>
+                        <button type="button" id="submitOrder" class="btn-primary w-full mt-6 py-3 rounded-lg text-white font-medium disabled:opacity-50" disabled>
+                            <i class="fas fa-check-circle mr-2"></i> Valider la commande
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Colonne droite - Menu -->
+                <div class="lg:col-span-2">
+                    <div class="form-card bg-white rounded-xl shadow-md p-6 mb-6">
+                        <!-- Barre de recherche -->
+                        <div class="relative mb-6">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" id="menuSearch" placeholder="Rechercher un plat..." class="pl-10 pr-4 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <!-- Catégories -->
+                        <div class="flex overflow-x-auto pb-2 mb-6 space-x-2">
+                            <button class="menu-category active px-4 py-2 text-sm font-medium whitespace-nowrap">
+                                Tous
+                            </button>
+                            <button class="menu-category px-4 py-2 text-sm font-medium whitespace-nowrap">
+                                Entrées
+                            </button>
+                            <button class="menu-category px-4 py-2 text-sm font-medium whitespace-nowrap">
+                                Plats
+                            </button>
+                            <button class="menu-category px-4 py-2 text-sm font-medium whitespace-nowrap">
+                                Desserts
+                            </button>
+                            <button class="menu-category px-4 py-2 text-sm font-medium whitespace-nowrap">
+                                Boissons
+                            </button>
+                        </div>
+                        
+                        <!-- Liste des plats -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Plat 1 -->
+                            <div class="menu-item bg-white border rounded-lg p-4 cursor-pointer hover:shadow-md transition">
+                                <div class="flex justify-between">
+                                    <h3 class="font-bold">Salade César</h3>
+                                    <span class="font-bold text-primary">12,50 €</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Laitue romaine, croûtons, parmesan</p>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-xs text-gray-500">Entrée</span>
+                                    <button class="add-to-order text-xs bg-primary text-white px-3 py-1 rounded-full hover:opacity-90">
+                                        <i class="fas fa-plus mr-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Plat 2 -->
+                            <div class="menu-item bg-white border rounded-lg p-4 cursor-pointer hover:shadow-md transition">
+                                <div class="flex justify-between">
+                                    <h3 class="font-bold">Steak Frites</h3>
+                                    <span class="font-bold text-primary">18,90 €</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Angus 250g, frites maison</p>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-xs text-gray-500">Plat principal</span>
+                                    <button class="add-to-order text-xs bg-primary text-white px-3 py-1 rounded-full hover:opacity-90">
+                                        <i class="fas fa-plus mr-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Plat 3 -->
+                            <div class="menu-item bg-white border rounded-lg p-4 cursor-pointer hover:shadow-md transition">
+                                <div class="flex justify-between">
+                                    <h3 class="font-bold">Pâtes Carbonara</h3>
+                                    <span class="font-bold text-primary">14,50 €</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Spaghetti, lardons, crème</p>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-xs text-gray-500">Plat principal</span>
+                                    <button class="add-to-order text-xs bg-primary text-white px-3 py-1 rounded-full hover:opacity-90">
+                                        <i class="fas fa-plus mr-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Plat 4 -->
+                            <div class="menu-item bg-white border rounded-lg p-4 cursor-pointer hover:shadow-md transition">
+                                <div class="flex justify-between">
+                                    <h3 class="font-bold">Tiramisu</h3>
+                                    <span class="font-bold text-primary">7,50 €</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Dessert italien au café</p>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-xs text-gray-500">Dessert</span>
+                                    <button class="add-to-order text-xs bg-primary text-white px-3 py-1 rounded-full hover:opacity-90">
+                                        <i class="fas fa-plus mr-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Plat 5 -->
+                            <div class="menu-item bg-white border rounded-lg p-4 cursor-pointer hover:shadow-md transition">
+                                <div class="flex justify-between">
+                                    <h3 class="font-bold">Vin rouge maison</h3>
+                                    <span class="font-bold text-primary">5,50 €</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Verre 15cl</p>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-xs text-gray-500">Boisson</span>
+                                    <button class="add-to-order text-xs bg-primary text-white px-3 py-1 rounded-full hover:opacity-90">
+                                        <i class="fas fa-plus mr-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Plat 6 -->
+                            <div class="menu-item bg-white border rounded-lg p-4 cursor-pointer hover:shadow-md transition">
+                                <div class="flex justify-between">
+                                    <h3 class="font-bold">Menu Enfant</h3>
+                                    <span class="font-bold text-primary">12,00 €</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Nuggets + frites + boisson + dessert</p>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-xs text-gray-500">Menu spécial</span>
+                                    <button class="add-to-order text-xs bg-primary text-white px-3 py-1 rounded-full hover:opacity-90">
+                                        <i class="fas fa-plus mr-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Articles sélectionnés -->
+                    <div class="form-card bg-white rounded-xl shadow-md p-6">
+                        <h2 class="font-bold text-lg mb-4">Articles sélectionnés</h2>
+                        <div id="selectedItems" class="space-y-3">
+                            <p class="text-gray-500 text-sm">Aucun article sélectionné</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Modification Article -->
+    <div id="itemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg" id="modalItemName">Modifier article</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
+                <div class="flex items-center">
+                    <button id="decreaseQty" class="bg-gray-200 px-3 py-1 rounded-l-lg">-</button>
+                    <input type="number" id="itemQty" min="1" value="1" class="w-16 text-center border-t border-b border-gray-300 py-1">
+                    <button id="increaseQty" class="bg-gray-200 px-3 py-1 rounded-r-lg">+</button>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Instructions spéciales</label>
+                <textarea id="itemNotes" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button id="removeItem" class="px-4 py-2 text-red-600 hover:text-red-800">
+                    <i class="fas fa-trash mr-1"></i> Supprimer
+                </button>
+                <button id="saveItem" class="btn-primary px-4 py-2 rounded-lg text-white">
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Données temporaires
+        let currentOrder = {
+            items: [],
+            table: null,
+            people: 1,
+            server: null,
+            notes: ''
+        };
+
+        // Éléments du DOM
+        const orderSummary = document.getElementById('orderSummary');
+        const selectedItems = document.getElementById('selectedItems');
+        const subtotalEl = document.getElementById('subtotal');
+        const serviceEl = document.getElementById('service');
+        const totalEl = document.getElementById('total');
+        const submitOrder = document.getElementById('submitOrder');
+        const itemModal = document.getElementById('itemModal');
+        
+        // Fonction pour mettre à jour le résumé
+        function updateOrderSummary() {
+            // Calcul du total
+            const subtotal = currentOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const service = subtotal * 0.10;
+            const total = subtotal + service;
+            
+            // Mise à jour de l'UI
+            subtotalEl.textContent = subtotal.toFixed(2) + ' €';
+            serviceEl.textContent = service.toFixed(2) + ' €';
+            totalEl.textContent = total.toFixed(2) + ' €';
+            
+            // Activer/désactiver le bouton de soumission
+            submitOrder.disabled = currentOrder.items.length === 0;
+            
+            // Mise à jour du résumé des articles
+            if (currentOrder.items.length === 0) {
+                orderSummary.innerHTML = '<p class="text-gray-500 text-sm">Aucun article ajouté</p>';
+            } else {
+                orderSummary.innerHTML = currentOrder.items.map(item => 
+                    `<div class="flex justify-between py-1 border-b border-gray-100">
+                        <span>${item.quantity}x ${item.name}</span>
+                        <span>${(item.price * item.quantity).toFixed(2)} €</span>
+                    </div>`
+                ).join('');
+            }
+            
+            // Mise à jour des articles sélectionnés
+            if (currentOrder.items.length === 0) {
+                selectedItems.innerHTML = '<p class="text-gray-500 text-sm">Aucun article sélectionné</p>';
+            } else {
+                selectedItems.innerHTML = currentOrder.items.map((item, index) => 
+                    `<div class="selected-item flex justify-between items-center p-3 rounded-lg">
+                        <div>
+                            <p class="font-medium">${item.quantity}x ${item.name}</p>
+                            ${item.notes ? `<p class="text-xs text-gray-500">${item.notes}</p>` : ''}
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="font-medium">${(item.price * item.quantity).toFixed(2)} €</span>
+                            <button class="edit-item text-blue-500 hover:text-blue-700" data-index="${index}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>`
+                ).join('');
+                
+                // Ajouter les écouteurs d'événements aux boutons d'édition
+                document.querySelectorAll('.edit-item').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        openEditModal(index);
+                    });
+                });
+            }
+        }
+        
+        // Fonction pour ouvrir le modal d'édition
+        function openEditModal(index) {
+            const item = currentOrder.items[index];
+            document.getElementById('modalItemName').textContent = item.name;
+            document.getElementById('itemQty').value = item.quantity;
+            document.getElementById('itemNotes').value = item.notes || '';
+            
+            // Stocker l'index de l'item en cours d'édition
+            itemModal.setAttribute('data-index', index);
+            
+            // Gérer les boutons +/-
+            document.getElementById('decreaseQty').onclick = () => {
+                const qty = parseInt(document.getElementById('itemQty').value);
+                if (qty > 1) document.getElementById('itemQty').value = qty - 1;
+            };
+            
+            document.getElementById('increaseQty').onclick = () => {
+                const qty = parseInt(document.getElementById('itemQty').value);
+                document.getElementById('itemQty').value = qty + 1;
+            };
+            
+            // Gérer la suppression
+            document.getElementById('removeItem').onclick = () => {
+                currentOrder.items.splice(index, 1);
+                updateOrderSummary();
+                itemModal.classList.add('hidden');
+            };
+            
+            // Gérer l'enregistrement
+            document.getElementById('saveItem').onclick = () => {
+                const qty = parseInt(document.getElementById('itemQty').value);
+                const notes = document.getElementById('itemNotes').value;
+                
+                currentOrder.items[index].quantity = qty;
+                currentOrder.items[index].notes = notes;
+                
+                updateOrderSummary();
+                itemModal.classList.add('hidden');
+            };
+            
+            // Afficher le modal
+            itemModal.classList.remove('hidden');
+        }
+        
+        // Ajouter un article à la commande
+        document.querySelectorAll('.add-to-order').forEach(button => {
+            button.addEventListener('click', function() {
+                const menuItem = this.closest('.menu-item');
+                const name = menuItem.querySelector('h3').textContent;
+                const price = parseFloat(menuItem.querySelector('.text-primary').textContent.replace(' €', '').replace(',', '.'));
+                
+                // Vérifier si l'article existe déjà
+                const existingItemIndex = currentOrder.items.findIndex(item => item.name === name && !item.notes);
+                
+                if (existingItemIndex >= 0) {
+                    // Incrémenter la quantité si l'article existe sans notes
+                    currentOrder.items[existingItemIndex].quantity += 1;
+                } else {
+                    // Ajouter un nouvel article
+                    currentOrder.items.push({
+                        name: name,
+                        price: price,
+                        quantity: 1,
+                        notes: ''
+                    });
+                }
+                
+                updateOrderSummary();
+            });
+        });
+        
+        // Fermer le modal
+        document.getElementById('closeModal').addEventListener('click', () => {
+            itemModal.classList.add('hidden');
+        });
+        
+        // Soumettre la commande
+        submitOrder.addEventListener('click', () => {
+            // Ici vous ajouteriez la logique pour enregistrer la commande
+            alert('Commande enregistrée avec succès!');
+            // Réinitialiser le formulaire
+            currentOrder.items = [];
+            updateOrderSummary();
+            // Redirection vers la liste des commandes
+            // window.location.href = 'commandes.html';
+        });
+        
+        // Initialisation
+        updateOrderSummary();
+    </script>
+</body>
+</html>

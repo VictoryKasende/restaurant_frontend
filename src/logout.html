@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastroManager - Déconnexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FFE66D;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: var(--dark);
+        }
+        
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .logout-card {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .logout-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-secondary {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 107, 107, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-50">
+    <!-- Carte de déconnexion -->
+    <div class="logout-card bg-white rounded-xl p-8 w-full max-w-md mx-4">
+        <div class="text-center mb-8">
+            <div class="flex justify-center items-center mb-4">
+                <div class="gradient-bg text-white p-3 rounded-lg inline-flex">
+                    <i class="fas fa-utensils text-2xl"></i>
+                </div>
+            </div>
+            <h1 class="title-font text-3xl font-bold text-gray-800 mb-2">GastroManager</h1>
+            <p class="text-gray-600">Gestion professionnelle pour votre établissement</p>
+        </div>
+        
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <i class="fas fa-sign-out-alt text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">Êtes-vous sûr de vouloir vous déconnecter?</h3>
+            <div class="mt-2 max-w-xl text-sm text-gray-500">
+                <p>Vous pourrez vous reconnecter à tout moment avec vos identifiants.</p>
+            </div>
+            
+            <div class="mt-8 flex justify-center space-x-4">
+                <button type="button" id="cancelLogout" 
+                        class="btn-secondary inline-flex items-center px-4 py-2 border rounded-lg font-medium focus:outline-none">
+                    <i class="fas fa-times mr-2"></i> Annuler
+                </button>
+                <button type="button" id="confirmLogout" 
+                        class="btn-primary inline-flex items-center px-4 py-2 border border-transparent rounded-lg font-medium text-white focus:outline-none">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+        
+        <!-- Lien vers la page d'accueil -->
+        <div class="mt-8 text-center">
+            <a href="#" class="text-sm font-medium text-primary hover:text-opacity-80">
+                <i class="fas fa-home mr-1"></i> Retour à l'accueil
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Gestion de l'annulation
+        document.getElementById('cancelLogout').addEventListener('click', function() {
+            // Retour à la page précédente
+            window.history.back();
+            // Ou redirection vers le tableau de bord
+            // window.location.href = 'dashboard.html';
+        });
+
+        // Gestion de la déconnexion
+        document.getElementById('confirmLogout').addEventListener('click', function() {
+            // Ici vous ajouteriez la logique de déconnexion
+            // Suppression du token, etc.
+            console.log('Utilisateur déconnecté');
+            
+            // Redirection vers la page de connexion après déconnexion
+            window.location.href = 'login.html';
+            
+            // Pour l'exemple, simulation avec un délai
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Déconnexion...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

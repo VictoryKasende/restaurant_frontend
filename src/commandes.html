@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastroManager - Gestion des Commandes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FFE66D;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: var(--dark);
+        }
+        
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .order-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .order-status-pending {
+            border-left-color: #3B82F6;
+        }
+        
+        .order-status-preparing {
+            border-left-color: #F59E0B;
+        }
+        
+        .order-status-ready {
+            border-left-color: #10B981;
+        }
+        
+        .order-status-delivered {
+            border-left-color: #6B7280;
+        }
+        
+        .order-status-cancelled {
+            border-left-color: #EF4444;
+        }
+        
+        /* Animation for notifications */
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .notification {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-2xl"></i>
+                <span class="title-font text-2xl font-bold">GastroManager</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#" class="hover:text-gray-200 font-medium">Tableau de bord</a>
+                <a href="#" class="hover:text-gray-200 font-medium">Menu</a>
+                <a href="#" class="hover:text-gray-200 font-medium active-nav">Commandes</a>
+                <a href="#" class="hover:text-gray-200 font-medium">Tables</a>
+                <a href="#" class="hover:text-gray-200 font-medium">Rapports</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button id="notifBtn" class="relative p-2 rounded-full hover:bg-white hover:bg-opacity-20">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                    </button>
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg z-50">
+                        <div class="p-3 border-b">
+                            <h4 class="font-bold text-gray-800">Notifications</h4>
+                        </div>
+                        <div class="max-h-60 overflow-y-auto">
+                            <div class="notification p-3 border-b hover:bg-gray-50">
+                                <p class="text-sm text-gray-700">Nouvelle commande #58</p>
+                                <p class="text-xs text-gray-500">Il y a 2 min</p>
+                            </div>
+                            <div class="notification p-3 border-b hover:bg-gray-50">
+                                <p class="text-sm text-gray-700">Commande #45 prête à servir</p>
+                                <p class="text-xs text-gray-500">Il y a 15 min</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="h-8 w-8 rounded-full">
+                    <span class="hidden md:inline" id="currentUser">Sophie Martin</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+            <button class="md:hidden" id="mobileMenuBtn">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white shadow-lg">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="#" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Tableau de bord</a>
+            <a href="#" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Menu</a>
+            <a href="#" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Commandes</a>
+            <a href="#" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Tables</a>
+            <a href="#" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Rapports</a>
+        </div>
+    </div>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="hidden md:block w-64 bg-white shadow-lg h-screen sticky top-0">
+            <div class="p-4">
+                <div class="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Profile" class="h-10 w-10 rounded-full">
+                    <div>
+                        <p class="font-medium">Sophie Martin</p>
+                        <p class="text-xs text-gray-500">Gérante</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <h3 class="text-xs uppercase font-semibold text-gray-500 px-3 mb-2">Gestion</h3>
+                    <ul>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-tachometer-alt w-5"></i>
+                                <span>Tableau de bord</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-utensils w-5"></i>
+                                <span>Menu</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg bg-blue-50 text-blue-600">
+                            <a href="#" class="flex items-center space-x-3 p-3">
+                                <i class="fas fa-clipboard-list w-5"></i>
+                                <span>Commandes</span>
+                                <span class="ml-auto bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">8</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <i class="fas fa-chair w-5"></i>
+                                <span>Gestion des tables</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h3 class="text-xs uppercase font-semibold text-gray-500 px-3 mt-6 mb-2">Statut Commandes</h3>
+                    <ul>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <span>En attente</span>
+                                <span class="ml-auto text-xs text-gray-500">3</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                                <span>En préparation</span>
+                                <span class="ml-auto text-xs text-gray-500">4</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item rounded-lg">
+                            <a href="#" class="flex items-center space-x-3 p-3 text-gray-700 hover:text-primary">
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                <span>Prêtes à servir</span>
+                                <span class="ml-auto text-xs text-gray-500">1</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="title-font text-3xl font-bold text-gray-800">Gestion des Commandes</h1>
+                <div class="flex space-x-3">
+                    <button class="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50">
+                        <i class="fas fa-filter mr-2"></i> Filtres
+                    </button>
+                    <button class="gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90">
+                        <i class="fas fa-plus mr-2"></i> Nouvelle commande
+                    </button>
+                </div>
+            </div>
+
+            <!-- Order Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+                    <p class="text-gray-500">En attente</p>
+                    <p class="text-2xl font-bold text-blue-600">3</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+                    <p class="text-gray-500">En préparation</p>
+                    <p class="text-2xl font-bold text-yellow-600">4</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+                    <p class="text-gray-500">Prêtes à servir</p>
+                    <p class="text-2xl font-bold text-green-600">1</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-center">
+                    <p class="text-gray-500">Total aujourd'hui</p>
+                    <p class="text-2xl font-bold text-gray-800">8</p>
+                </div>
+            </div>
+
+            <!-- Orders List -->
+            <div class="space-y-4">
+                <!-- Order 1 - Ready -->
+                <div class="order-card order-status-ready bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-3 md:mb-0">
+                            <div class="flex items-center space-x-3">
+                                <h3 class="font-bold">Commande #58</h3>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Prête à servir</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Table 12 • 4 personnes</p>
+                            <p class="text-sm text-gray-600">Passée il y a 15 min</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold">Total: 42,50 €</span>
+                            <button class="text-green-600 hover:text-green-800">
+                                <i class="fas fa-check-circle text-xl"></i>
+                            </button>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <h4 class="font-medium mb-2">Articles:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Salade César</p>
+                                    <p class="text-sm text-gray-500">x1 • 12,50 €</p>
+                                    <p class="text-xs text-gray-400">Sans croûtons</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Steak Frites</p>
+                                    <p class="text-sm text-gray-500">x1 • 18,90 €</p>
+                                    <p class="text-xs text-gray-400">Bleu, sauce béarnaise</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-wine-glass-alt"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Vin rouge</p>
+                                    <p class="text-sm text-gray-500">x2 • 11,10 €</p>
+                                    <p class="text-xs text-gray-400">Verre 15cl</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order 2 - Preparing -->
+                <div class="order-card order-status-preparing bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-3 md:mb-0">
+                            <div class="flex items-center space-x-3">
+                                <h3 class="font-bold">Commande #57</h3>
+                                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">En préparation</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Table 8 • 2 personnes</p>
+                            <p class="text-sm text-gray-600">Passée il y a 25 min</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold">Total: 36,80 €</span>
+                            <button class="text-green-600 hover:text-green-800">
+                                <i class="fas fa-check-circle text-xl"></i>
+                            </button>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <h4 class="font-medium mb-2">Articles:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Burger Gourmet</p>
+                                    <p class="text-sm text-gray-500">x2 • 28,00 €</p>
+                                    <p class="text-xs text-gray-400">1 sans oignons</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-beer"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Bières pression</p>
+                                    <p class="text-sm text-gray-500">x2 • 8,80 €</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order 3 - Pending -->
+                <div class="order-card order-status-pending bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-3 md:mb-0">
+                            <div class="flex items-center space-x-3">
+                                <h3 class="font-bold">Commande #56</h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">En attente</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Table 5 • 6 personnes</p>
+                            <p class="text-sm text-gray-600">Passée il y a 5 min</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold">Total: 78,90 €</span>
+                            <button class="text-yellow-600 hover:text-yellow-800">
+                                <i class="fas fa-utensils text-xl"></i>
+                            </button>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <h4 class="font-medium mb-2">Articles:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Assiette de charcuterie</p>
+                                    <p class="text-sm text-gray-500">x1 • 16,50 €</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Pâtes Carbonara</p>
+                                    <p class="text-sm text-gray-500">x3 • 42,00 €</p>
+                                    <p class="text-xs text-gray-400">1 sans lardons</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-gray-100 text-gray-800 rounded-lg p-2">
+                                    <i class="fas fa-wine-glass-alt"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Vin blanc</p>
+                                    <p class="text-sm text-gray-500">x2 • 20,40 €</p>
+                                    <p class="text-xs text-gray-400">Bouteille</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-center mt-8">
+                <nav class="flex items-center space-x-2">
+                    <button class="px-3 py-1 rounded border text-gray-500 hover:bg-gray-100">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="px-3 py-1 rounded border bg-blue-500 text-white">1</button>
+                    <button class="px-3 py-1 rounded border text-gray-700 hover:bg-gray-100">2</button>
+                    <button class="px-3 py-1 rounded border text-gray-700 hover:bg-gray-100">3</button>
+                    <span class="px-2 text-gray-500">...</span>
+                    <button class="px-3 py-1 rounded border text-gray-700 hover:bg-gray-100">5</button>
+                    <button class="px-3 py-1 rounded border text-gray-500 hover:bg-gray-100">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+
+        // Notification dropdown toggle
+        document.getElementById('notifBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('notifDropdown').classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            document.getElementById('notifDropdown').classList.add('hidden');
+        });
+
+        // Change order status (example for order #58)
+        document.querySelector('.order-status-ready .fa-check-circle').addEventListener('click', function() {
+            const orderCard = this.closest('.order-card');
+            orderCard.classList.remove('order-status-ready');
+            orderCard.classList.add('order-status-delivered');
+            
+            const statusBadge = orderCard.querySelector('.bg-green-100');
+            statusBadge.classList.remove('bg-green-100', 'text-green-800');
+            statusBadge.classList.add('bg-gray-100', 'text-gray-800');
+            statusBadge.textContent = 'Servie';
+            
+            this.classList.remove('text-green-600');
+            this.classList.add('text-gray-400');
+        });
+    </script>
+</body>
+</html>
