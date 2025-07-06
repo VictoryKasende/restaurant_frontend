@@ -9,6 +9,7 @@ const Login = () => {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ open: false, type: 'success', message: '' });
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -18,8 +19,7 @@ const Login = () => {
     setLoading(true);
     try {
       const user = await handleLogin(username, password);
-      // Toast de succès (window.toast doit être défini dans l'app, sinon ignorer)
-      window.toast && window.toast.success('Connexion réussie !');
+      setToast({ open: true, type: 'success', message: 'Connexion réussie !' });
       if (user.role === 'restaurateur') {
         navigate('/dashboard');
       } else {
@@ -27,7 +27,7 @@ const Login = () => {
       }
     } catch (err) {
       setError("Identifiants invalides ou erreur serveur");
-      window.toast && window.toast.error('Échec de la connexion');
+      setToast({ open: true, type: 'error', message: 'Échec de la connexion' });
     } finally {
       setLoading(false);
     }
@@ -38,12 +38,10 @@ const Login = () => {
       <div className="login-card bg-white rounded-xl p-8 w-full max-w-md mx-4">
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
-            <div className="gradient-bg text-white p-3 rounded-lg inline-flex">
-              <i className="fas fa-utensils text-2xl"></i>
-            </div>
+            <img src="/public/vite.svg" alt="Logo Tabor" className="h-12 w-12 rounded-full shadow mx-auto mb-2" />
           </div>
-          <h1 className="title-font text-3xl font-bold text-gray-800 mb-2">GastroManager</h1>
-          <p className="text-gray-600">Connectez-vous à votre espace professionnel</p>
+          <h1 className="title-font text-3xl font-bold text-gray-800 mb-2">Tabor Restaurant</h1>
+          <p className="text-gray-600">Connectez-vous à votre espace client</p>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
@@ -113,13 +111,16 @@ const Login = () => {
         </div>
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Nouveau sur GastroManager?{' '}
+            Nouveau chez Tabor Restaurant ?{' '}
             <Link to="/register" className="font-medium text-primary hover:text-opacity-80">Créer un compte</Link>
           </p>
         </div>
       </div>
+      {/* ToastModal */}
+      <ToastModal open={toast.open} type={toast.type} message={toast.message} onClose={() => setToast({ ...toast, open: false })} />
     </div>
   );
 };
 
+import ToastModal from '../components/ToastModal';
 export default Login;

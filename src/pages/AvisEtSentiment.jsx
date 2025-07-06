@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api'; // Assurez-vous que le chemin d'importation est correct
+import api from '../services/api';
 import AvisCard from '../components/AvisCard';
+import AvisStats from '../components/AvisStats';
+import SentimentPie from '../components/SentimentPie';
+import SentimentTrends from '../components/SentimentTrends';
+import WordCloudAvis from '../components/WordCloudAvis';
 
 export default function AvisEtSentiment() {
   const [avis, setAvis] = useState([]);
@@ -40,8 +44,33 @@ export default function AvisEtSentiment() {
   };
 
   return (
-    <div className="p-6">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+    <main className="flex-1 p-6 bg-gray-50 min-h-screen">
+      {/* Header actions */}
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-in">
+        <h1 className="title-font text-3xl font-bold text-gray-800">Analyse des Avis Clients</h1>
+        
+      </div>
+
+      {/* Stats Cards */}
+      <AvisStats avis={avis} />
+
+      {/* Sentiment Analysis */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-fade-in">
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-md  flex flex-col">
+          <div className="h-80">
+            <SentimentTrends avis={avis} />
+          </div>
+        </div>
+        <div className="bg-white rounded-xl shadow-md p-6 flex flex-col">
+          <h2 className="title-font text-xl font-bold text-gray-800 mb-6">Répartition des Sentiments</h2>
+          <div className="h-80">
+            <SentimentPie avis={avis} />
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Reviews */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8 animate-fade-in">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="title-font text-xl font-bold text-gray-800">Derniers Avis</h2>
@@ -79,6 +108,8 @@ export default function AvisEtSentiment() {
           </div>
         </div>
       )}
-    </div>
+      {/* Word Cloud */}
+      <WordCloudAvis avis={avis} />
+    </main>
   );
 }

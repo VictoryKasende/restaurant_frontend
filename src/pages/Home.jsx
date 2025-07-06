@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import ToastModal from '../components/ToastModal';
 
 const Home = () => {
   // Plats dynamiques
@@ -30,6 +31,9 @@ const Home = () => {
   const [reviewError, setReviewError] = useState(null);
   const [reviewSuccess, setReviewSuccess] = useState(null);
 
+  // Toast
+  const [toast, setToast] = useState({ open: false, type: 'success', message: '' });
+
   const { user, handleLogout } = useAuth();
   const navigate = typeof useNavigate !== 'undefined' ? useNavigate() : null;
 
@@ -50,6 +54,19 @@ const Home = () => {
     // Récupérer les avis
     fetchAvis();
   }, []);
+
+  // Récupérer les commandes de l'utilisateur connecté
+  const [userCommandes, setUserCommandes] = useState([]);
+  const fetchUserCommandes = () => {
+    if (user && user.role === 'client') {
+      api.get('commandes/?client=' + user.username)
+        .then(res => setUserCommandes(res.data))
+        .catch(() => setUserCommandes([]));
+    }
+  };
+  useEffect(() => {
+    fetchUserCommandes();
+  }, [user]);
 
   // Ajouter un plat au panier
   const addToCart = (plat) => {
@@ -75,26 +92,53 @@ const Home = () => {
   // Passer la commande (POST /commandes/)
   const handleOrder = async () => {
     if (!user) {
-      alert('Vous devez être connecté pour commander.');
+      setToast({ open: true, type: 'error', message: 'Vous devez être connecté pour commander.' });
       if (navigate) navigate('/login');
       return;
     }
     if (user.role !== 'client') {
-      setOrderError('Seuls les clients peuvent passer une commande.');
+      setToast({ open: true, type: 'error', message: 'Seuls les clients peuvent passer une commande.' });
       return;
     }
     setOrderLoading(true);
     setOrderError(null);
     setOrderSuccess(null);
     try {
-      await api.post('commandes/', {
-        statut: 'en_attente',
+      const res = await api.post('commandes/', {
+        statut: 'pending',
         lignes: cart.map(item => ({ plat_id: item.id, quantite: item.quantity })),
       });
+      console.log('Réponse API commande:', res.data); // DEBUG
       setOrderSuccess('Commande passée avec succès !');
+      setToast({ open: true, type: 'success', message: 'Commande passée avec succès !' });
       setCart([]);
+      setShowCart(false);
+      fetchUserCommandes();
+      // Ouvre la modale d'avis sur le premier plat commandé (UX simple)
+      if (res.data && res.data.lignes && res.data.lignes.length > 0) {
+        const ligne = res.data.lignes[0];
+        console.log('Ligne de commande:', ligne); // DEBUG
+        // Cas API : ligne contient id (id de la ligne), nom_plat, mais pas d'id de plat direct
+        // On tente de matcher sur le nom du plat
+        let plat = null;
+        if (ligne.nom_plat) {
+          plat = plats.find(p => p.nom === ligne.nom_plat);
+        }
+        // fallback : si jamais on a un id qui correspond à un plat
+        if (!plat && ligne.id) {
+          plat = plats.find(p => p.id === ligne.id);
+        }
+        if (plat) {
+          setTimeout(() => openReviewModal(plat), 500);
+        } else {
+          setToast({ open: true, type: 'info', message: "Aucun plat trouvé pour ouvrir la modale d'avis." });
+        }
+      } else {
+        setToast({ open: true, type: 'info', message: "Aucun plat trouvé dans la commande pour ouvrir la modale d'avis." });
+      }
     } catch (e) {
       setOrderError("Erreur lors de la commande. Veuillez réessayer.");
+      setToast({ open: true, type: 'error', message: "Erreur lors de la commande. Veuillez réessayer." });
     } finally {
       setOrderLoading(false);
     }
@@ -115,29 +159,72 @@ const Home = () => {
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      alert('Vous devez être connecté pour laisser un avis.');
+      setToast({ open: true, type: 'error', message: 'Vous devez être connecté pour laisser un avis.' });
       if (navigate) navigate('/login');
       return;
     }
     if (user.role !== 'client') {
       setReviewError('Seuls les clients peuvent laisser un avis.');
+      setToast({ open: true, type: 'error', message: 'Seuls les clients peuvent laisser un avis.' });
       return;
     }
     setReviewLoading(true);
     setReviewError(null);
     setReviewSuccess(null);
     try {
-      await api.post('avis/', {
-        commande: reviewPlat.id, // À adapter si ce n'est pas l'id de la commande mais du plat
-        texte: reviewComment,
+      await fetchUserCommandes(); // <-- s'assure d'avoir la dernière commande
+      // Trouver la dernière commande contenant ce plat (par nom)
+      const lastCommande = userCommandes.find(cmd =>
+        cmd.lignes && cmd.lignes.some(l => l.nom_plat === reviewPlat.nom)
+      );
+      if (!lastCommande) {
+        setReviewError("Vous devez avoir commandé ce plat pour laisser un avis.");
+        setToast({ open: true, type: 'error', message: "Vous devez avoir commandé ce plat pour laisser un avis." });
+        setReviewLoading(false);
+        return;
+      }
+      // Vérification du type et du contenu
+      const commandeId = Number(lastCommande.id);
+      const texteAvis = reviewComment ? reviewComment.trim() : '';
+      if (!commandeId || !texteAvis) {
+        setReviewError("Commande ou texte d'avis invalide.");
+        setToast({ open: true, type: 'error', message: "Commande ou texte d'avis invalide." });
+        setReviewLoading(false);
+        return;
+      }
+      // DEBUG : log du body envoyé
+      console.log('Body avis envoyé:', {
+        commande: commandeId,
+        texte: texteAvis
       });
+      let response;
+      try {
+        response = await api.post('avis/', {
+          commande: commandeId,
+          texte: texteAvis
+        });
+      } catch (err) {
+        // Affiche le message d'erreur retourné par l'API si disponible
+        let apiMsg = '';
+        if (err.response && err.response.data) {
+          apiMsg = typeof err.response.data === 'string' ? err.response.data : JSON.stringify(err.response.data);
+        }
+        setReviewError("Erreur lors de l'envoi de l'avis. " + (apiMsg ? `Détail: ${apiMsg}` : 'Veuillez réessayer.'));
+        setToast({ open: true, type: 'error', message: "Erreur lors de l'envoi de l'avis. " + (apiMsg ? `Détail: ${apiMsg}` : 'Veuillez réessayer.') });
+        setReviewLoading(false);
+        return;
+      }
+      console.log('Réponse API avis:', response.data);
       setReviewSuccess('Merci pour votre avis !');
+      setToast({ open: true, type: 'success', message: 'Merci pour votre avis !' });
       setReviewComment('');
       setReviewRating(0);
       setReviewName('');
-      fetchAvis(); // Recharge les avis après ajout
+      setShowReviewModal(false);
+      fetchAvis();
     } catch (err) {
       setReviewError("Erreur lors de l'envoi de l'avis. Veuillez réessayer.");
+      setToast({ open: true, type: 'error', message: "Erreur lors de l'envoi de l'avis. Veuillez réessayer." });
     } finally {
       setReviewLoading(false);
     }
@@ -154,37 +241,36 @@ const Home = () => {
   return (
     <>
       {/* Navbar fixe en haut */}
-      <nav className="fixed top-0 left-0 w-full bg-white shadow z-50">
+      <nav className="fixed top-0 left-0 w-full gradient-bg text-white bg-gradient-to-br from-pink-600 via-purple-600 to-blue-600 shadow z-50">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <i className="fas fa-utensils text-2xl text-pink-600"></i>
-            <span className="title-font text-2xl font-bold text-gray-800">GastroManager</span>
+          <div className="flex items-center space-x-3">
+            <img src="/public/vite.svg" alt="Logo Tabor" className="h-10 w-10 rounded-full shadow" />
+            <span className="title-font text-2xl md:text-3xl font-extrabold text-white tracking-wide drop-shadow">Tabor Restaurant</span>
           </div>
-          <div className="flex items-center space-x-6">
-            <a href="/" className="hover:text-pink-600 font-medium">Accueil</a>
-            <a href="/menu" className="hover:text-pink-600 font-medium">Menu</a>
+          <div className="flex items-center space-x-8">
+            <a href="#menu" className="hover:text-yellow-300 text-white font-semibold transition">Menu</a>
+            <a href="#about" className="hover:text-yellow-300 text-white font-semibold transition">Notre histoire</a>
+            <a href="#contact" className="hover:text-yellow-300 text-white font-semibold transition">Contact</a>
             {user ? (
               <>
-                <span className="font-medium text-gray-700">{user.first_name || user.username}</span>
+                <span className="font-semibold text-white bg-black/20 px-3 py-1 rounded-lg">{user.first_name || user.username}</span>
                 <button
                   onClick={() => {
                     handleLogout();
                     if (typeof navigate === 'function') navigate('/');
                   }}
-                  className="hover:text-pink-600 font-medium"
+                  className="hover:text-yellow-300 text-white font-semibold transition"
                 >
                   Déconnexion
                 </button>
               </>
             ) : (
-              <a href="/login" className="hover:text-pink-600 font-medium">Connexion</a>
+              <a href="/login" className="hover:text-yellow-300 text-white font-semibold transition">Connexion</a>
             )}
-          </div>
-          <div className="relative">
-            <button id="cartButton" className="text-gray-700 hover:text-pink-600 p-2 relative" onClick={() => setShowCart(true)}>
+            <button id="cartButton" className="ml-4 text-white hover:text-yellow-300 p-2 relative" onClick={() => setShowCart(true)}>
               <i className="fas fa-shopping-cart text-xl"></i>
               {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                   {cart.length}
                 </span>
               )}
@@ -193,14 +279,14 @@ const Home = () => {
         </div>
       </nav>
       {/* Décale le contenu principal sous la navbar */}
-      <div className="pt-20">
+      <div className="pt-24">
         {/* Hero Section */}
-        <header className="gradient-bg text-white py-20">
+        <header className="gradient-bg text-white py-20 bg-gradient-to-br from-pink-600 via-purple-600 to-blue-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="title-font text-4xl md:text-5xl font-bold mb-4">Découvrez l'art culinaire français</h1>
-            <p className="text-xl mb-8">Une expérience gastronomique inoubliable</p>
-            <a href="#menu" className="btn-primary inline-flex items-center px-6 py-3 border border-transparent rounded-lg font-medium text-white">
-              Voir le menu <i className="fas fa-arrow-down ml-2"></i>
+            <h1 className="title-font text-5xl md:text-6xl font-extrabold mb-4 drop-shadow-lg">Bienvenue chez Tabor Restaurant</h1>
+            <p className="text-2xl md:text-3xl mb-8 font-medium drop-shadow">L'excellence culinaire éthiopienne et internationale, par le chef Service Katola</p>
+            <a href="#menu" className="btn-primary inline-flex items-center px-8 py-4 border border-transparent rounded-lg font-bold text-lg bg-yellow-400 text-black shadow-lg hover:bg-yellow-300 transition">
+              Découvrir le menu <i className="fas fa-arrow-down ml-3"></i>
             </a>
           </div>
         </header>
@@ -228,10 +314,7 @@ const Home = () => {
                         <button className="add-to-cart btn-primary px-4 py-2 rounded-lg text-sm text-white" onClick={() => addToCart(plat)}>
                           <i className="fas fa-cart-plus mr-1"></i> Ajouter
                         </button>
-                        {/* Bouton Avis */}
-                        <button className="show-review-form text-gray-500 hover:text-primary px-3 py-1 text-sm" onClick={() => openReviewModal(plat)}>
-                          <i className="fas fa-comment-alt mr-1"></i> Avis
-                        </button>
+                        {/* Bouton Avis supprimé */}
                       </div>
                     </div>
                   </div>
@@ -325,9 +408,9 @@ const Home = () => {
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="lg:w-1/2">
                 <h2 className="title-font text-3xl font-bold mb-6">Notre Histoire</h2>
-                <p className="text-gray-600 mb-4">Fondé en 1985, Le Gourmet Français est rapidement devenu une référence de la cuisine traditionnelle française à Paris.</p>
-                <p className="text-gray-600 mb-4">Notre chef, Jean-Luc Dubois, formé auprès des plus grands noms de la gastronomie française, apporte son savoir-faire et sa passion dans chaque plat.</p>
-                <p className="text-gray-600">Nous nous engageons à utiliser des produits locaux et de saison pour offrir une expérience authentique et responsable.</p>
+                <p className="text-gray-600 mb-4">Fondé par le chef Service Katola, Tabor Restaurant est une référence de la cuisine éthiopienne et internationale à Paris. Notre passion est de faire découvrir des saveurs authentiques, généreuses et créatives dans un cadre chaleureux.</p>
+                <p className="text-gray-600 mb-4">Le chef Service Katola, fort de plus de 20 ans d'expérience, sublime chaque plat avec des produits frais, locaux et des épices venues d'Éthiopie. Son savoir-faire et son accueil font de chaque repas un moment unique.</p>
+                <p className="text-gray-600">Tabor Restaurant s'engage à offrir une expérience gastronomique conviviale, responsable et mémorable à tous ses clients.</p>
               </div>
               <div className="lg:w-1/2 mt-8 lg:mt-0 lg:pl-12">
                 <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Notre restaurant" className="rounded-lg shadow-lg w-full" />
@@ -387,29 +470,27 @@ const Home = () => {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-800 text-white py-8">
+        <footer className="gradient-bg text-white py-8 bg-gradient-to-br from-pink-600 via-purple-600 to-blue-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="md:flex md:justify-between md:items-center">
               <div className="flex items-center mb-4 md:mb-0">
-                <div className="gradient-bg text-white p-2 rounded-lg">
-                  <i className="fas fa-utensils"></i>
-                </div>
-                <span className="title-font text-xl font-bold ml-2">Le Gourmet Français</span>
+                <img src="/public/vite.svg" alt="Logo Tabor" className="h-10 w-10 rounded-full shadow" />
+                <span className="title-font text-xl font-bold ml-2">Tabor Restaurant</span>
               </div>
               <div className="flex space-x-6">
-                <a href="#" className="text-gray-300 hover:text-white">
+                <a href="#" className="text-yellow-300 hover:text-white">
                   <i className="fab fa-facebook-f"></i>
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <a href="#" className="text-yellow-300 hover:text-white">
                   <i className="fab fa-instagram"></i>
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <a href="#" className="text-yellow-300 hover:text-white">
                   <i className="fab fa-tripadvisor"></i>
                 </a>
               </div>
             </div>
-            <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400 text-sm">
-              <p>&copy; 2023 Le Gourmet Français. Tous droits réservés.</p>
+            <div className="mt-8 pt-8 border-t border-yellow-200 text-center text-yellow-100 text-sm">
+              <p>&copy; 2025 Tabor Restaurant. Chef Service Katola. Tous droits réservés.</p>
             </div>
           </div>
         </footer>
@@ -448,6 +529,7 @@ const Home = () => {
             </div>
           </div>
         )}
+        <ToastModal open={toast.open} type={toast.type} message={toast.message} onClose={() => setToast({ ...toast, open: false })} />
       </div>
     </>
   );

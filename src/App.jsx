@@ -34,7 +34,6 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/redirect" element={<RoleRedirect />} />
       <Route
         path="/dashboard"
         element={
@@ -44,7 +43,7 @@ function App() {
         }
       />
       <Route
-        path="/menu"
+        path="/dashboard/menu"
         element={
           <LayoutRestaurateur>
             <MenuGestion />
@@ -52,7 +51,7 @@ function App() {
         }
       />
       <Route
-        path="/commandes"
+        path="/dashboard/commandes"
         element={
           <LayoutRestaurateur>
             <CommandesGestion />
@@ -60,7 +59,7 @@ function App() {
         }
       />
       <Route
-        path="/avis"
+        path="/dashboard/avis"
         element={
           <LayoutRestaurateur>
             <AvisEtSentiment />
@@ -68,7 +67,7 @@ function App() {
         }
       />
       <Route
-        path="/tables"
+        path="/dashboard/tables"
         element={
           <LayoutRestaurateur>
             <TablesGestion />

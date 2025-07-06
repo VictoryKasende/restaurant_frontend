@@ -3,35 +3,42 @@ import React from 'react';
 export default function SentimentPie({ avis }) {
   // Placeholder camembert (à remplacer par un vrai graphique si besoin)
   const total = avis.length;
-  const pos = avis.filter(a => a.sentiment === 'positif').length;
-  const neu = avis.filter(a => a.sentiment === 'neutre').length;
-  const neg = avis.filter(a => a.sentiment === 'negatif').length;
+  const pos = avis.filter(a => (a.sentiment === 'positif' || a.sentiment_label === 'positif')).length;
+  const neu = avis.filter(a => (a.sentiment === 'neutre' || a.sentiment_label === 'neutre')).length;
+  const neg = avis.filter(a => (a.sentiment === 'negatif' || a.sentiment_label === 'négatif')).length;
   return (
-    <div className="h-80 flex flex-col items-center justify-center">
-      <div className="relative w-40 h-40 mb-6">
-        <div className="absolute inset-0 rounded-full bg-green-100 flex items-center justify-center">
-          <div className="h-32 w-32 rounded-full bg-white flex items-center justify-center">
-            <span className="text-xl font-bold">{total ? Math.round((pos / total) * 100) : 0}%</span>
+    <div className="w-full max-w-md mx-auto py-8">
+      
+      <div className="space-y-6">
+        {/* Positif */}
+        <div>
+          <div className="flex justify-between mb-1">
+            <span className="flex items-center"><span className="h-3 w-3 rounded-full bg-green-500 mr-2"></span>Positif</span>
+            <span className="font-semibold">{total ? Math.round((pos / total) * 100) : 0}% <span className="text-gray-400 text-xs">({pos})</span></span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div className="h-4 rounded-full bg-green-500 transition-all duration-500" style={{width: `${total ? (pos / total) * 100 : 0}%`}}></div>
           </div>
         </div>
-        {/* Camembert visuel simplifié */}
-        <div className="absolute inset-0 rounded-full" style={{clipPath:'polygon(0 0, 100% 0, 100% 50%, 0 50%)', background:`conic-gradient(#10B981 ${pos/total*100||0}%, #F59E0B ${(pos/total*100||0)+(neu/total*100||0)}%, #EF4444 100%)`}}></div>
-      </div>
-      <div className="w-full space-y-3">
-        <div className="flex items-center">
-          <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
-          <span className="text-sm">Positif</span>
-          <span className="ml-auto font-medium">{total ? Math.round((pos / total) * 100) : 0}%</span>
+        {/* Neutre */}
+        <div>
+          <div className="flex justify-between mb-1">
+            <span className="flex items-center"><span className="h-3 w-3 rounded-full bg-yellow-500 mr-2"></span>Neutre</span>
+            <span className="font-semibold">{total ? Math.round((neu / total) * 100) : 0}% <span className="text-gray-400 text-xs">({neu})</span></span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div className="h-4 rounded-full bg-yellow-500 transition-all duration-500" style={{width: `${total ? (neu / total) * 100 : 0}%`}}></div>
+          </div>
         </div>
-        <div className="flex items-center">
-          <div className="h-3 w-3 rounded-full bg-yellow-500 mr-2"></div>
-          <span className="text-sm">Neutre</span>
-          <span className="ml-auto font-medium">{total ? Math.round((neu / total) * 100) : 0}%</span>
-        </div>
-        <div className="flex items-center">
-          <div className="h-3 w-3 rounded-full bg-red-500 mr-2"></div>
-          <span className="text-sm">Négatif</span>
-          <span className="ml-auto font-medium">{total ? Math.round((neg / total) * 100) : 0}%</span>
+        {/* Négatif */}
+        <div>
+          <div className="flex justify-between mb-1">
+            <span className="flex items-center"><span className="h-3 w-3 rounded-full bg-red-500 mr-2"></span>Négatif</span>
+            <span className="font-semibold">{total ? Math.round((neg / total) * 100) : 0}% <span className="text-gray-400 text-xs">({neg})</span></span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div className="h-4 rounded-full bg-red-500 transition-all duration-500" style={{width: `${total ? (neg / total) * 100 : 0}%`}}></div>
+          </div>
         </div>
       </div>
     </div>

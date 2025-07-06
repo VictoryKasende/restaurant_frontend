@@ -3,6 +3,8 @@ import api from '../services/api';
 import CommandeCard from '../components/CommandeCard';
 import CommandeStats from '../components/CommandeStats';
 import CommandeFormModal from '../components/CommandeFormModal';
+import CommandeStatusModal from '../components/CommandeStatusModal';
+import ToastModal from '../components/ToastModal';
 
 const STATUTS = [
   { key: 'pending', label: 'En attente', color: 'blue' },
@@ -13,6 +15,9 @@ const STATUTS = [
 ];
 
 export default function CommandesGestion() {
+  // Pagination
+  const [page, setPage] = useState(1);
+  const commandesParPage = 10;
   const [commandes, setCommandes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtre, setFiltre] = useState('');
@@ -20,6 +25,9 @@ export default function CommandesGestion() {
   const [plats, setPlats] = useState([]);
   const [tables, setTables] = useState([]);
   const [search, setSearch] = useState('');
+  const [statusModal, setStatusModal] = useState({ open: false, commande: null });
+  const [toast, setToast] = useState({ open: false, type: 'success', message: '' });
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchCommandes();
@@ -60,9 +68,10 @@ export default function CommandesGestion() {
         note: form.note,
       });
       setModalOpen(false);
+      setToast({ open: true, type: 'success', message: 'Commande créée avec succès !' });
       fetchCommandes();
     } catch {
-      alert('Erreur lors de la création de la commande');
+      setToast({ open: true, type: 'error', message: 'Erreur lors de la création de la commande' });
     }
   };
 
@@ -81,6 +90,13 @@ export default function CommandesGestion() {
     );
   });
 
+  // Pagination : découpage des commandes filtrées
+  const totalPages = Math.ceil(commandesFiltrees.length / commandesParPage) || 1;
+  const commandesPage = commandesFiltrees.slice((page - 1) * commandesParPage, page * commandesParPage);
+
+  // Remettre à la page 1 si filtre ou recherche change
+  useEffect(() => { setPage(1); }, [filtre, search]);
+
   // Statistiques par statut
   const stats = STATUTS.map(s => ({
     ...s,
@@ -92,9 +108,25 @@ export default function CommandesGestion() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="title-font text-3xl font-bold text-gray-800">Gestion des Commandes</h1>
         <div className="flex space-x-3">
-          <button className="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50">
-            <i className="fas fa-filter mr-2"></i> Filtres
-          </button>
+          <div className="relative">
+            <button className="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50" onClick={() => setShowFilters(f => !f)}>
+              <i className="fas fa-filter mr-2"></i> Filtres
+            </button>
+            {showFilters && (
+              <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg z-10 animate-pop-in">
+                {STATUTS.map(s => (
+                  <button
+                    key={s.key}
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${filtre === s.key ? 'bg-blue-50 font-bold text-blue-700' : ''}`}
+                    onClick={() => { setFiltre(s.key); setShowFilters(false); }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+                <button className="block w-full text-left px-4 py-2 hover:bg-gray-100" onClick={() => { setFiltre(''); setShowFilters(false); }}>Tous</button>
+              </div>
+            )}
+          </div>
           <button className="gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90" onClick={handleAdd}>
             <i className="fas fa-plus mr-2"></i> Nouvelle commande
           </button>
@@ -113,13 +145,68 @@ export default function CommandesGestion() {
       {loading ? (
         <div className="text-center py-10">Chargement...</div>
       ) : (
-        <div className="space-y-4 mt-6">
-          {commandesFiltrees.map(cmd => (
-            <CommandeCard key={cmd.id} commande={cmd} onStatusChange={fetchCommandes} />
-          ))}
-        </div>
+        <>
+          <div className="space-y-4 mt-6">
+            {commandesPage.length === 0 ? (
+              <div className="text-center text-gray-500">Aucune commande à afficher.</div>
+            ) : (
+              commandesPage.map(cmd => (
+                <div key={cmd.id} onClick={() => setStatusModal({ open: true, commande: cmd })} className="cursor-pointer">
+                  <CommandeCard commande={cmd} />
+                </div>
+              ))
+            )}
+          </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-2 mt-8">
+              <button
+                className="px-3 py-1 rounded bg-gradient-to-br from-pink-600 via-purple-600 to-blue-600 text-white font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                Précédent
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  className={`px-3 py-1 rounded font-bold shadow transition-all duration-150 mx-0.5 ${num === page
+                    ? 'bg-gradient-to-br from-pink-600 via-purple-600 to-blue-600 text-white scale-110 border-2 border-yellow-400'
+                    : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50'}
+                  `}
+                  onClick={() => setPage(num)}
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                className="px-3 py-1 rounded bg-gradient-to-br from-pink-600 via-purple-600 to-blue-600 text-white font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Suivant
+              </button>
+            </div>
+          )}
+        </>
       )}
       <CommandeFormModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} plats={plats} tables={tables} />
+      <CommandeStatusModal
+        open={statusModal.open}
+        commande={statusModal.commande}
+        onClose={() => setStatusModal({ open: false, commande: null })}
+        onSave={async (newStatut) => {
+          try {
+            await api.patch(`/commandes/${statusModal.commande.id}/`, { statut: newStatut });
+            setToast({ open: true, type: 'success', message: 'Statut modifié avec succès !' });
+            setStatusModal({ open: false, commande: null });
+            fetchCommandes();
+          } catch {
+            setToast({ open: true, type: 'error', message: 'Erreur lors de la modification du statut' });
+          }
+        }}
+      />
+      <ToastModal open={toast.open} type={toast.type} message={toast.message} onClose={() => setToast(t => ({ ...t, open: false }))} />
     </div>
   );
 }
