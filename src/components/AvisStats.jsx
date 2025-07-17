@@ -8,7 +8,7 @@ export default function AvisStats({ avis }) {
   const now = new Date();
   const moisCourant = now.toISOString().slice(0, 7); // ex: '2025-07'
   // Avis ajoutés ce mois
-  const avisCeMois = avis.filter(a => (a.date || '').slice(0, 7) === moisCourant).length;
+  // ...existing code...
   // Moyenne satisfaction (note sur 5, conversion depuis score sur 100 ou [-1,1])
   let moy = 0;
   if (total > 0) {
@@ -36,8 +36,7 @@ export default function AvisStats({ avis }) {
     return acc;
   }, {});
   const positifs = sentiments['positif'] || 0;
-  const neutres = sentiments['neutre'] || 0;
-  const negatifs = sentiments['negatif'] || sentiments['négatif'] || 0;
+  // ...existing code...
   // Pourcentage positifs
   const pctPos = total ? Math.round((positifs / total) * 100) : 0;
   // Pourcentage réponses (nombre d'avis avec une réponse / total)
