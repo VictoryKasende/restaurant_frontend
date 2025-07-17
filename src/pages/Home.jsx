@@ -67,7 +67,7 @@ const Home = () => {
   };
   useEffect(() => {
     fetchUserCommandes();
-  }, [user]);
+  }, [user, fetchUserCommandes]);
 
   // Ajouter un plat au panier
   const addToCart = (plat) => {
@@ -119,13 +119,13 @@ const Home = () => {
       if (res.data && res.data.lignes && res.data.lignes.length > 0) {
         const ligne = res.data.lignes[0];
         console.log('Ligne de commande:', ligne); // DEBUG
-        // Cas API : ligne contient id (id de la ligne), nom_plat, mais pas d'id de plat direct
+        // Cas API : ligne contient id (id de la ligne), nom_plat, mais pas d'id de plat direct
         // On tente de matcher sur le nom du plat
         let plat = null;
         if (ligne.nom_plat) {
           plat = plats.find(p => p.nom === ligne.nom_plat);
         }
-        // fallback : si jamais on a un id qui correspond à un plat
+        // fallback : si jamais on a un id qui correspond à un plat
         if (!plat && ligne.id) {
           plat = plats.find(p => p.id === ligne.id);
         }
