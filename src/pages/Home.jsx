@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import ToastModal from '../components/ToastModal';
@@ -35,7 +36,7 @@ const Home = () => {
   const [toast, setToast] = useState({ open: false, type: 'success', message: '' });
 
   const { user, handleLogout } = useAuth();
-  const navigate = typeof useNavigate !== 'undefined' ? useNavigate() : null;
+  const navigate = useNavigate();
 
   // Fonction pour charger les avis
   const fetchAvis = () => {
@@ -136,7 +137,7 @@ const Home = () => {
       } else {
         setToast({ open: true, type: 'info', message: "Aucun plat trouvé dans la commande pour ouvrir la modale d'avis." });
       }
-    } catch (e) {
+    } catch {
       setOrderError("Erreur lors de la commande. Veuillez réessayer.");
       setToast({ open: true, type: 'error', message: "Erreur lors de la commande. Veuillez réessayer." });
     } finally {
@@ -222,7 +223,7 @@ const Home = () => {
       setReviewName('');
       setShowReviewModal(false);
       fetchAvis();
-    } catch (err) {
+    } catch {
       setReviewError("Erreur lors de l'envoi de l'avis. Veuillez réessayer.");
       setToast({ open: true, type: 'error', message: "Erreur lors de l'envoi de l'avis. Veuillez réessayer." });
     } finally {

@@ -13,7 +13,7 @@ export function useAuth() {
     if (token && !user) {
       getMe().then(setUser).catch(() => setUser(null));
     }
-  }, []);
+  }, [user]);
 
   const handleLogin = async (username, password) => {
     setLoading(true);
