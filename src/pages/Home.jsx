@@ -58,13 +58,13 @@ const Home = () => {
 
   // Récupérer les commandes de l'utilisateur connecté
   const [userCommandes, setUserCommandes] = useState([]);
-  const fetchUserCommandes = () => {
+  const fetchUserCommandes = React.useCallback(() => {
     if (user && user.role === 'client') {
       api.get('commandes/?client=' + user.username)
         .then(res => setUserCommandes(res.data))
         .catch(() => setUserCommandes([]));
     }
-  };
+  }, [user]);
   useEffect(() => {
     fetchUserCommandes();
   }, [user, fetchUserCommandes]);
