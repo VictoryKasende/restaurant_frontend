@@ -1,6 +1,6 @@
 // Hook personnalisé pour la gestion de l’authentification
 import { useState, useEffect } from 'react';
-import { login, refresh, logout, getMe } from '../services/authService';
+import { login, logout, getMe } from '../services/authService';
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -13,7 +13,7 @@ export function useAuth() {
     if (token && !user) {
       getMe().then(setUser).catch(() => setUser(null));
     }
-  }, []);
+  }, [user]);
 
   const handleLogin = async (username, password) => {
     setLoading(true);

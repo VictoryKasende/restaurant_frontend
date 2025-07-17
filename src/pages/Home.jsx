@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import ToastModal from '../components/ToastModal';
@@ -35,7 +36,7 @@ const Home = () => {
   const [toast, setToast] = useState({ open: false, type: 'success', message: '' });
 
   const { user, handleLogout } = useAuth();
-  const navigate = typeof useNavigate !== 'undefined' ? useNavigate() : null;
+  const navigate = useNavigate();
 
   // Fonction pour charger les avis
   const fetchAvis = () => {
@@ -57,16 +58,16 @@ const Home = () => {
 
   // Récupérer les commandes de l'utilisateur connecté
   const [userCommandes, setUserCommandes] = useState([]);
-  const fetchUserCommandes = () => {
+  const fetchUserCommandes = React.useCallback(() => {
     if (user && user.role === 'client') {
       api.get('commandes/?client=' + user.username)
         .then(res => setUserCommandes(res.data))
         .catch(() => setUserCommandes([]));
     }
-  };
+  }, [user]);
   useEffect(() => {
     fetchUserCommandes();
-  }, [user]);
+  }, [user, fetchUserCommandes]);
 
   // Ajouter un plat au panier
   const addToCart = (plat) => {
@@ -118,13 +119,13 @@ const Home = () => {
       if (res.data && res.data.lignes && res.data.lignes.length > 0) {
         const ligne = res.data.lignes[0];
         console.log('Ligne de commande:', ligne); // DEBUG
-        // Cas API : ligne contient id (id de la ligne), nom_plat, mais pas d'id de plat direct
+        // Cas API : ligne contient id (id de la ligne), nom_plat, mais pas d'id de plat direct
         // On tente de matcher sur le nom du plat
         let plat = null;
         if (ligne.nom_plat) {
           plat = plats.find(p => p.nom === ligne.nom_plat);
         }
-        // fallback : si jamais on a un id qui correspond à un plat
+        // fallback : si jamais on a un id qui correspond à un plat
         if (!plat && ligne.id) {
           plat = plats.find(p => p.id === ligne.id);
         }
@@ -136,7 +137,7 @@ const Home = () => {
       } else {
         setToast({ open: true, type: 'info', message: "Aucun plat trouvé dans la commande pour ouvrir la modale d'avis." });
       }
-    } catch (e) {
+    } catch {
       setOrderError("Erreur lors de la commande. Veuillez réessayer.");
       setToast({ open: true, type: 'error', message: "Erreur lors de la commande. Veuillez réessayer." });
     } finally {
@@ -222,7 +223,7 @@ const Home = () => {
       setReviewName('');
       setShowReviewModal(false);
       fetchAvis();
-    } catch (err) {
+    } catch {
       setReviewError("Erreur lors de l'envoi de l'avis. Veuillez réessayer.");
       setToast({ open: true, type: 'error', message: "Erreur lors de l'envoi de l'avis. Veuillez réessayer." });
     } finally {

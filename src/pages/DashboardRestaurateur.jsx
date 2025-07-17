@@ -3,7 +3,7 @@ import api from '../services/api';
 
 const DashboardRestaurateur = () => {
   // Statistiques
-  const [stats, setStats] = useState({});
+  // ...existing code...
   // Menu
   const [plats, setPlats] = useState([]);
   const [loadingPlats, setLoadingPlats] = useState(true);

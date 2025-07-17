@@ -40,8 +40,8 @@ export default function CommandesGestion() {
     try {
       const res = await api.get('/commandes/');
       setCommandes(res.data);
-    } catch (e) {
-      // TODO: gestion d'erreur
+    } catch {
+      // gestion d'erreur possible ici
     }
     setLoading(false);
   };
@@ -50,13 +50,17 @@ export default function CommandesGestion() {
     try {
       const res = await api.get('/plats/');
       setPlats(res.data);
-    } catch {}
+    } catch {
+      // erreur ignorée intentionnellement
+    }
   };
   const fetchTables = async () => {
     try {
       const res = await api.get('/tables/');
       setTables(res.data);
-    } catch {}
+    } catch {
+      // erreur ignorée intentionnellement
+    }
   };
 
   const handleAdd = () => setModalOpen(true);
