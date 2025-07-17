@@ -14,7 +14,7 @@ export default function CommandeCard({ commande, onStatusChange }) {
     try {
       await api.patch(`/commandes/${commande.id}/`, { statut: newStatus });
       onStatusChange && onStatusChange();
-    } catch (e) {
+    } catch {
       alert("Erreur lors du changement de statut");
     }
   };

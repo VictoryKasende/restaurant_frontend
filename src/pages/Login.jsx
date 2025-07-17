@@ -25,7 +25,7 @@ const Login = () => {
       } else {
         navigate('/');
       }
-    } catch (err) {
+    } catch {
       setError("Identifiants invalides ou erreur serveur");
       setToast({ open: true, type: 'error', message: 'Échec de la connexion' });
     } finally {

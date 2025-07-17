@@ -35,7 +35,7 @@ export default function MenuGestion() {
     try {
       const res = await api.get('/plats/');
       setPlats(res.data);
-    } catch (e) {
+    } catch {
       // TODO: gestion d'erreur
     }
     setLoading(false);

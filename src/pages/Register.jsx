@@ -58,7 +58,7 @@ const Register = () => {
       setConfirmPassword('');
       setEstablishment('');
       setTerms(false);
-    } catch (err) {
+    } catch {
       setError("Erreur lors de l'inscription. Vérifiez vos informations ou réessayez.");
     } finally {
       setLoading(false);
