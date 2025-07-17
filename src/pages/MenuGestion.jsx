@@ -67,7 +67,7 @@ export default function MenuGestion() {
       setToast({ open: true, type: 'success', message: 'Plat supprimé avec succès !' });
       setConfirm({ open: false, plat: null });
       fetchPlats();
-    } catch (e) {
+    } catch {
       setToast({ open: true, type: 'error', message: "Erreur lors de la suppression" });
       setConfirm({ open: false, plat: null });
     }
@@ -92,7 +92,7 @@ export default function MenuGestion() {
       }
       setModalOpen(false);
       fetchPlats();
-    } catch (e) {
+    } catch {
       setToast({ open: true, type: 'error', message: "Erreur lors de l'enregistrement" });
     }
   };
