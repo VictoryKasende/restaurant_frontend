@@ -40,8 +40,8 @@ export default function CommandesGestion() {
     try {
       const res = await api.get('/commandes/');
       setCommandes(res.data);
-    } catch (e) {
-      // TODO: gestion d'erreur
+    } catch {
+      // gestion d'erreur possible ici
     }
     setLoading(false);
   };
