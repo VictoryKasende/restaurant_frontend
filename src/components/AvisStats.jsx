@@ -5,8 +5,7 @@ export default function AvisStats({ avis }) {
   if (!avis || avis.length === 0) return null;
   const total = avis.length;
   // Date du mois courant
-  const now = new Date();
-  const moisCourant = now.toISOString().slice(0, 7); // ex: '2025-07'
+  // ...existing code...
   // Avis ajoutés ce mois
   // ...existing code...
   // Moyenne satisfaction (note sur 5, conversion depuis score sur 100 ou [-1,1])
