@@ -30,8 +30,9 @@ export default function TablesGestion() {
     try {
       const res = await api.get('/tables/');
       setTables(res.data);
-    } catch {}
-    setLoading(false);
+      } catch (error) {
+        console.error("Error fetching tables:", error);
+      }
   };
 
   const handleAdd = () => {
@@ -47,8 +48,8 @@ export default function TablesGestion() {
       try {
         await api.delete(`/tables/${table.id}/`);
         fetchTables();
-      } catch {
-        alert('Erreur lors de la suppression');
+      } catch (error) {
+        alert('Erreur lors de la suppression: ' + error.message);
       }
     }
   };
@@ -61,8 +62,8 @@ export default function TablesGestion() {
       }
       setModalOpen(false);
       fetchTables();
-    } catch {
-      alert("Erreur lors de l'enregistrement");
+      } catch (error) {
+        alert("Erreur lors de l'enregistrement: " + error.message);
     }
   };
 
