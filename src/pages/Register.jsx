@@ -70,12 +70,10 @@ const Register = () => {
       <div className="register-card bg-white rounded-xl p-8 w-full max-w-md mx-4">
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
-            <div className="gradient-bg text-white p-3 rounded-lg inline-flex">
-              <i className="fas fa-utensils text-2xl"></i>
-            </div>
+            <img src="/public/vite.svg" alt="Logo Tabor" className="h-12 w-12 rounded-full shadow mx-auto mb-2" />
           </div>
-          <h1 className="title-font text-3xl font-bold text-gray-800 mb-2">GastroManager</h1>
-          <p className="text-gray-600">Créez votre compte professionnel</p>
+          <h1 className="title-font text-3xl font-bold text-gray-800 mb-2">Tabor Restaurant</h1>
+          <p className="text-gray-600 text-center">Inscrivez-vous</p>
         </div>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>

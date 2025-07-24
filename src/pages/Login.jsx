@@ -41,7 +41,7 @@ const Login = () => {
             <img src="/public/vite.svg" alt="Logo Tabor" className="h-12 w-12 rounded-full shadow mx-auto mb-2" />
           </div>
           <h1 className="title-font text-3xl font-bold text-gray-800 mb-2">Tabor Restaurant</h1>
-          <p className="text-gray-600">Connectez-vous à votre espace client</p>
+          <p className="text-gray-600 text-center">Connectez-vous</p>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
